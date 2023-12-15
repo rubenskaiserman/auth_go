@@ -1,13 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 )
+
+type ErrorPage struct {
+	Error int
+}
 
 func init() {
 	err := godotenv.Load()
@@ -19,7 +23,7 @@ func init() {
 func main() {
 	log.Print("starting server...")
 	http.Handle("/", http.FileServer(http.Dir("./template")))
-	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.HandleFunc("/auth", auth)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -33,13 +37,23 @@ func main() {
 	}
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	name := os.Getenv("NAME")
+func auth(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		p := &ErrorPage{Error: 405}
 
-	fmt.Printf("Request: %s\n", r.RemoteAddr)
+		t, err := template.ParseFiles("./template/httperror.html")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
-	if name == "" {
-		name = "World"
+		err = t.Execute(w, p)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
-	fmt.Fprintf(w, "Hello %s!\n", name)
 }
