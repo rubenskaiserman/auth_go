@@ -1,0 +1,21 @@
+package login
+
+import "github.com/rubenskaiserman/auth_go/view/components"
+
+templ Show() {
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Chat Orchestrator Login</title>
+            <link
+                href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+                rel="stylesheet"
+            />
+        </head>
+        <body class="h-screen flex items-center justify-center">
+           @components.LoginForm()
+        </body>
+    </html>
+}
