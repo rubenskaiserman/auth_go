@@ -6,5 +6,5 @@ import (
 )
 
 func LoginPage(c echo.Context) error {
-	return render(c, login.Show())
+	return render(c, login.Show("Login"))
 }
