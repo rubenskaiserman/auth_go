@@ -3,17 +3,16 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/rubenskaiserman/auth_go/handler"
+	"github.com/rubenskaiserman/auth_go/model"
 )
-
-type ErrorPage struct {
-	Error int
-}
 
 func main() {
 	app := echo.New()
 
+	model.Login()
+
 	app.GET("/", handler.LoginPage)
-	app.POST("/auth/login", handler.Login)
+	// app.POST("/auth/login", handler.Login)
 
 	app.GET("/components/loading-spinning-button", handler.LoadingSpinningButton)
 

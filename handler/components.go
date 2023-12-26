@@ -14,6 +14,7 @@ func Test(c echo.Context) error {
 }
 
 func LoadingSpinningButton(c echo.Context) error {
-	fmt.Println("AAAAAAAAAAAAAA")
+	fmt.Println(c.Request())
+
 	return render(c, components.LoadingSpinningButton())
 }

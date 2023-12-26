@@ -4,9 +4,11 @@ go 1.21.5
 
 require github.com/a-h/templ v0.2.501
 
+require github.com/golang-jwt/jwt v3.2.2+incompatible
+
 require (
 	github.com/labstack/echo/v4 v4.11.4
-	github.com/labstack/gommon v0.4.2 // indirect
+	github.com/labstack/gommon v0.4.2
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
