@@ -1,47 +1,57 @@
 package components
 
 script login() {
-  // (async () => {
-  //   const response = await fetch('/components/loading-spinning-button')
-  //   document.getElementById("login-button").outerHTML = await response.text()
-  // })()
+    (async ()=> {
+        const response = await fetch("/auth/login", {
+            method: "POST",
+            body: new FormData(document.getElementById("login-form"))
+        }).then((res)=> {
+            if (res.status === 200) {
+                window.location.href = res.url
+            } else {
+                alert("Login failed")
+            }
+        }).catch((err)=> {
+            console.log(err)
+        })
+    })()
 }
 
 
 templ LoginForm() {
-    <div class="bg-white p-8 rounded w-96 text-center">
-      <h2 class="text-2xl font-semibold mb-6">Login</h2>
-      <div class="mb-4">
-        <label for="username" class="text-sm font-medium text-gray-800 focus:ouline text-left block">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          autofocus
-          class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:border-black focus:ring-black"
-          required
-        />
-      </div>
-      
-      <div class="mb-4">
-        <label for="password" class="text-sm font-medium text-gray-800 text-left block">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:border-black focus:ring-black"
-          required
-        />
-      </div>
-      <button
-        id="login-button"
-        class="text-white bg-black rounded px-10 py-2.5 me-2 mt-4 mb-2"
-        onclick={ login() }
-        hx-get="/components/loading-spinning-button"
-        hx-target="#login-button"
-        hx-swap="outerHTML"
-      >
-          Login
-      </button>
-    </div>
+        <form id="login-form" class="bg-white p-8 rounded w-96 text-center">
+            <h2 class="text-2xl font-semibold mb-6">Login</h2>
+            <div class="mb-4">
+                <label for="email" class="text-sm font-medium text-gray-800 focus:ouline text-left block">Email</label>
+                <input
+                    type="text"
+                    id="email"
+                    name="email"
+                    autofocus
+                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:border-black focus:ring-black"
+                    required
+                />
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="text-sm font-medium text-gray-800 text-left block">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:border-black focus:ring-black"
+                    required
+                />
+            </div>
+            <button
+                id="login-button"
+                class="text-white bg-black rounded px-10 py-2.5 me-2 mt-4 mb-2"
+                onclick={ login() }
+                hx-get="/components/loading-spinning-button"
+                hx-target="#login-button"
+                hx-swap="outerHTML"
+            >
+                    Login
+            </button>
+        </form>
 }
