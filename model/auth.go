@@ -3,11 +3,14 @@ package model
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/option"
@@ -16,8 +19,8 @@ import (
 var config map[string]interface{}
 
 type AuthTokens struct {
-	idToken      string
-	refreshToken string
+	IdToken      string
+	RefreshToken string
 }
 
 func init() {
@@ -65,8 +68,8 @@ func IdentityProviderLogin(email string, password string) (AuthTokens, error) {
 	json.NewDecoder(resp.Body).Decode(&result)
 
 	authTokens := AuthTokens{
-		idToken:      result["idToken"].(string),
-		refreshToken: result["refreshToken"].(string),
+		IdToken:      result["idToken"].(string),
+		RefreshToken: result["refreshToken"].(string),
 	}
 
 	return authTokens, nil
@@ -100,33 +103,66 @@ func RefreshJWT(authToken AuthTokens) {
 	// 2. return a new JWT
 }
 
-func RetrieveJWT(authCode string) {
+func RetrieveJWT(authCode string) (AuthTokens, error) {
 	// TODO: Implement JWT retrieval
+	ctx := context.Background()
+	projectID := config["gcpProjectId"].(string)
+	client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile("./credentials/gcp_firestore.json"))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+
+	defer client.Close()
+
+	queryResponse := *client.Collection("auth").Where("authCode", "==", authCode).Documents(ctx)
+	tokens, err := queryResponse.GetAll()
+	if err != nil {
+		log.Fatalf("Failed to get Auth info: %v", err)
+		return AuthTokens{}, err
+	}
+
+	if len(tokens) != 1 {
+		return AuthTokens{}, fmt.Errorf("Invalid auth code")
+	}
+
+	timestamp := tokens[0].Data()["timestamp"].(time.Time)
+	if time.Now().Sub(timestamp).Minutes() > 3 {
+		return AuthTokens{}, fmt.Errorf("Auth code expired")
+	}
+
+	authTokens := AuthTokens{
+		IdToken:      tokens[0].Data()["idToken"].(string),
+		RefreshToken: tokens[0].Data()["refreshToken"].(string),
+	}
 
 	// It should:
-	// 1. validate the JWT
-	// 		return an error if it is not valid
-	// 2. Get the JWT from the database
+
 	// 3. Check db writing timestamp
 	// 4. Delete the JWT from the database
 	// 5. if everything is successful and timestamp < 3 minutes, return the JWT
+	return authTokens, nil
 }
 
-func GenAuthCode() string {
-	// TODO: Implement AuthCode generation
+func GenAuthCode() (string, error) {
+	length := 32
 
-	// It should:
-	// 1. validate the JWT
-	// 		return an error if it is not valid
-	// 2. return the AuthCode
+	byteLength := length / 2
 
-	authCode := "123456"
-	return authCode
+	randomBytes := make([]byte, byteLength)
+
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", err
+	}
+
+	authCode := hex.EncodeToString(randomBytes)
+
+	return authCode, nil
 }
 
 func SaveJWT(authTokens AuthTokens, authCode string) error {
 	ctx := context.Background()
-	projectID := "botorchestrator-405819"
+	projectID := config["gcpProjectId"].(string)
 
 	client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile("./credentials/gcp_firestore.json"))
 	if err != nil {
@@ -137,16 +173,13 @@ func SaveJWT(authTokens AuthTokens, authCode string) error {
 
 	_, _, err = client.Collection("auth").Add(ctx, map[string]interface{}{
 		"authCode":     authCode,
-		"idToken":      authTokens.idToken,
-		"refreshToken": authTokens.refreshToken,
+		"idToken":      authTokens.IdToken,
+		"refreshToken": authTokens.RefreshToken,
 		"timestamp":    firestore.ServerTimestamp,
 	})
 	if err != nil {
 		log.Fatalf("Failed to add Auth info: %v", err)
 		return err
-	}
-	if err != nil {
-		log.Fatalf("Failed adding alovelace: %v", err)
 	}
 
 	return nil

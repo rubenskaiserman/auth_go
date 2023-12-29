@@ -1,0 +1,28 @@
+package app
+
+import "github.com/rubenskaiserman/auth_go/view/components"
+
+script validate() {
+    // validate if the user is logged in
+}
+
+templ Show(title string) {
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>{ title }</title>
+            <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+            <link
+                href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+                rel="stylesheet"
+            />
+            <link rel="icon" href="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" />
+        </head>
+        <body class="h-screen flex items-center justify-center">
+           @components.Success()
+        </body>
+    </html>
+}
