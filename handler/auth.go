@@ -8,10 +8,6 @@ import (
 	"github.com/rubenskaiserman/auth_go/model"
 )
 
-type LoginResponse struct {
-	Redirect string `json:"redirect"`
-}
-
 type TokenRequest struct {
 	AuthCode string `json:"authCode"`
 }
